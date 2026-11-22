@@ -207,7 +207,7 @@
   <div class="card plan">
     <div class="cal"><svg viewBox="0 0 24 24" fill="none" stroke="#f5c451" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 9.8h18M7.5 3v4M16.5 3v4"/><g fill="#f5c451" stroke="none"><circle cx="7.6" cy="13.4" r="1.15"/><circle cx="12" cy="13.4" r="1.15"/><circle cx="16.4" cy="13.4" r="1.15"/><circle cx="7.6" cy="17.2" r="1.15"/><circle cx="12" cy="17.2" r="1.15"/></g></svg></div>
     <div class="div"></div>
-    <div><div class="k">PLAN MENSUAL</div><div class="txt" id="planTxt">Debes meter <b>$0 al mes</b> para llegar a la meta.</div></div>
+    <div><div class="k">PLAN DIARIO</div><div class="txt" id="planTxt">Debes invertir <b>$0 diario</b> para llegar a la meta.</div></div>
   </div>
 
   <div class="card plan">
@@ -330,13 +330,16 @@
     $("ultVal").textContent = ult ? "+" + fmt0(+ult.monto) : "—";
     var dl = parseFecha(c.fechaLimite); dl.setHours(23,59,59,999);
     var rest = Math.max(0, c.meta - total);
-    var months = (dl - new Date())/DIA_MS/MES_DIAS;
+    var hoyP = new Date(); hoyP.setHours(0,0,0,0);
+    var diasPlan = Math.round((parseFecha(c.fechaLimite) - hoyP)/DIA_MS);
     if(rest <= 0){
       $("planTxt").innerHTML = "<b>Meta alcanzada.</b> Llegaste a los " + fmt0(c.meta) + ".";
-    } else if(months <= 0){
+    } else if(diasPlan < 0){
       $("planTxt").innerHTML = "La fecha límite ya pasó y te faltan <b>" + fmt0(rest) + "</b>.";
+    } else if(diasPlan === 0){
+      $("planTxt").innerHTML = "La fecha límite es <b>hoy</b> y te faltan <b>" + fmt0(rest) + "</b>.";
     } else {
-      $("planTxt").innerHTML = "Debes meter <b>" + fmt2(rest/months) + " al mes</b> para llegar a la meta en " + MESES[dl.getMonth()] + " de " + dl.getFullYear() + ".";
+      $("planTxt").innerHTML = "Te faltan <b>" + fmt0(rest) + "</b> — debes invertir <b>" + fmt2(rest/diasPlan) + " diario</b> para llegar a la meta.";
     }
     var hoy0 = new Date(); hoy0.setHours(0,0,0,0);
     var diasDif = Math.round((parseFecha(c.fechaLimite) - hoy0)/DIA_MS);
