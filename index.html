@@ -208,6 +208,12 @@
     <div><div class="k">PLAN MENSUAL</div><div class="txt" id="planTxt">Debes meter <b>$0 al mes</b> para llegar a la meta.</div></div>
   </div>
 
+  <div class="card plan">
+    <div class="cal"><svg viewBox="0 0 24 24" fill="none" stroke="#f5c451" stroke-width="1.7" stroke-linecap="round"><path d="M6 3h12M6 21h12M7.5 3v3.2L12 12l4.5-5.8V3M7.5 21v-3.2L12 12l4.5 5.8V21"/></svg></div>
+    <div class="div"></div>
+    <div><div class="k">DÍAS RESTANTES</div><div class="txt" id="diasTxt">Quedan <b>— días</b> para la fecha límite.</div></div>
+  </div>
+
   <button class="cta" id="btnAdd">Registrar aporte</button>
 
   <div class="history">
@@ -329,6 +335,18 @@
       $("planTxt").innerHTML = "La fecha límite ya pasó y te faltan <b>" + fmt0(rest) + "</b>.";
     } else {
       $("planTxt").innerHTML = "Debes meter <b>" + fmt2(rest/months) + " al mes</b> para llegar a la meta en " + MESES[dl.getMonth()] + " de " + dl.getFullYear() + ".";
+    }
+    var hoy0 = new Date(); hoy0.setHours(0,0,0,0);
+    var diasDif = Math.round((parseFecha(c.fechaLimite) - hoy0)/DIA_MS);
+    var fechaTxt = dl.getDate() + " de " + MESES[dl.getMonth()] + " de " + dl.getFullYear();
+    if(diasDif > 1){
+      $("diasTxt").innerHTML = "Te quedan <b>" + diasDif + " días</b> para llegar a la meta — la fecha límite es el " + fechaTxt + ".";
+    } else if(diasDif === 1){
+      $("diasTxt").innerHTML = "Te queda <b>1 día</b> — la fecha límite es mañana, " + fechaTxt + ".";
+    } else if(diasDif === 0){
+      $("diasTxt").innerHTML = "La fecha límite es <b>hoy</b>, " + fechaTxt + ".";
+    } else {
+      $("diasTxt").innerHTML = "La fecha límite ya pasó — era el " + fechaTxt + ".";
     }
     if(anim) animate(total, pct, c.meta);
     else {
