@@ -68,6 +68,7 @@
     box-shadow:0 0 26px rgba(245,196,81,.45), 0 12px 28px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.65);
   }
   .cta:active{ transform:scale(.985); }
+  .cta.off{ opacity:.5; box-shadow:none; }
   .stats{ margin-top:16px; padding:18px; }
   .srow{ display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
   .srow:last-child{ border-bottom:none; }
@@ -109,7 +110,7 @@
   <div class="card grid-card">
     <div class="k">LOS 100 DÍAS</div>
     <div class="grid" id="grid"></div>
-    <div class="grid-note">Toca un cuadrito pa' marcar o desmarcar ese día. La semana de Cuba no cuenta: la cuenta se pausa y se sigue al volver.</div>
+    <div class="grid-note">Cada día solo se puede marcar el día en curso: hoy marcas el de hoy, mañana el de mañana — no se puede adelantar. Si un día no subes nada, no lo marcas y la cuenta sigue cuando vuelvas; así funciona también la semana de Cuba. Si marcas por error, toca el botón otra vez hoy mismo pa' desmarcar.</div>
   </div>
 
   <div class="card stats">
@@ -135,20 +136,27 @@
   function fmtN(n){ return (n===null || n===undefined) ? "—" : Number(n).toLocaleString("en-US"); }
   function fmtH(n){ return (n===null || n===undefined) ? "—" : Number(n).toLocaleString("en-US",{maximumFractionDigits:1}); }
 
-  function marks(){ return lsGet("reto100_marks", []); }
+  function hoyStr(){
+    var h = new Date();
+    return h.getFullYear() + "-" + String(h.getMonth()+1).padStart(2,"0") + "-" + String(h.getDate()).padStart(2,"0");
+  }
+  function fechas(){
+    var f = lsGet("reto100_fechas", null);
+    if(f) return f;
+    var viejos = lsGet("reto100_marks", []), n = viejos.length, out = [];
+    for(var i=n-1;i>=0;i--){
+      var d = new Date(); d.setDate(d.getDate()-i);
+      out.push(d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"));
+    }
+    lsSet("reto100_fechas", out);
+    return out;
+  }
   function buildGrid(){
-    var g = $("grid"), mk = marks(), s = "";
+    var g = $("grid"), n = fechas().length, s = "";
     for(var i=1;i<=100;i++){
-      s += '<button class="cell' + (mk.indexOf(i)>=0 ? " on" : "") + '" data-day="' + i + '">' + i + "</button>";
+      s += '<div class="cell' + (i<=n ? " on" : "") + '">' + i + "</div>";
     }
     g.innerHTML = s;
-    g.querySelectorAll(".cell").forEach(function(b){
-      b.addEventListener("click", function(){
-        var d = +b.dataset.day, arr = marks(), ix = arr.indexOf(d);
-        if(ix>=0) arr.splice(ix,1); else arr.push(d);
-        lsSet("reto100_marks", arr); render();
-      });
-    });
   }
   function statRows(o){
     return ""
@@ -161,19 +169,21 @@
     + '<div class="srow"><span class="plat">Facebook — vistas</span><span class="nums">' + fmtN(o.fbVistas) + "</span></div>";
   }
   function render(){
-    var n = marks().length;
+    var f = fechas(), n = f.length, hoy = hoyStr(), marcadoHoy = f.indexOf(hoy)>=0;
     $("bigNum").textContent = n;
     $("bigLab").textContent = n===1 ? "día cumplido" : "días cumplidos";
     $("trackFill").style.width = Math.min(100, n) + "%";
     $("faltanLab").innerHTML = n>=100 ? "<b>¡Reto completado!</b>" : "Te faltan <b>" + (100-n) + (100-n===1 ? " día" : " días") + "</b>";
+    $("btnNext").textContent = marcadoHoy ? "Hoy ya está marcado — toca pa' desmarcar" : "Marcar el día de hoy";
+    $("btnNext").classList.toggle("off", marcadoHoy);
     buildGrid();
     $("statsStart").innerHTML = statRows(remote.arranque || {});
     $("statsEnd").innerHTML = statRows(remote.cierre || {});
   }
   $("btnNext").addEventListener("click", function(){
-    var arr = marks();
-    for(var i=1;i<=100;i++){ if(arr.indexOf(i)<0){ arr.push(i); break; } }
-    lsSet("reto100_marks", arr); render();
+    var f = fechas(), hoy = hoyStr(), ix = f.indexOf(hoy);
+    if(ix>=0) f.splice(ix,1); else f.push(hoy);
+    lsSet("reto100_fechas", f); render();
   });
 
   var cached = lsGet("reto100_remote", null);
