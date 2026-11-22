@@ -68,7 +68,7 @@
     box-shadow:0 0 26px rgba(245,196,81,.45), 0 12px 28px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.65);
   }
   .cta:active{ transform:scale(.985); }
-  .cta.off{ opacity:.5; box-shadow:none; }
+  .cta.off{ background:linear-gradient(180deg,#3d3d3d,#2a2a2a); color:#9a958a; box-shadow:none; }
   .stats{ margin-top:16px; padding:18px; }
   .srow{ display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
   .srow:last-child{ border-bottom:none; }
@@ -112,7 +112,7 @@
   <div class="card grid-card">
     <div class="k">LOS 100 DÍAS</div>
     <div class="grid" id="grid"></div>
-    <div class="grid-note">Cada día solo se puede marcar el día en curso: hoy marcas el de hoy, mañana el de mañana — no se puede adelantar. Si un día no subes nada, no lo marcas y la cuenta sigue cuando vuelvas; así funciona también la semana de Cuba. Si marcas por error, toca el botón otra vez hoy mismo pa' desmarcar.</div>
+    <div class="grid-note">Cada día solo se puede marcar el día en curso: hoy marcas el de hoy, mañana el de mañana — no se puede adelantar. Si un día no subes nada, no lo marcas y la cuenta sigue cuando vuelvas; así funciona también la semana de Cuba. Una vez marcado, el día queda fijo: no se puede desmarcar. A medianoche el botón se activa solo de nuevo pa'l día siguiente.</div>
   </div>
 
   <div class="card stats">
@@ -179,17 +179,25 @@
     $("bigLab").textContent = n===1 ? "día cumplido" : "días cumplidos";
     $("trackFill").style.width = Math.min(100, n) + "%";
     $("faltanLab").innerHTML = n>=100 ? "<b>¡Reto completado!</b>" : "Te faltan <b>" + (100-n) + (100-n===1 ? " día" : " días") + "</b>";
-    $("btnNext").textContent = marcadoHoy ? "Hoy ya está marcado — toca pa' desmarcar" : "Marcar el día de hoy";
+    $("btnNext").textContent = "Marcar el día de hoy";
     $("btnNext").classList.toggle("off", marcadoHoy);
+    $("btnNext").disabled = marcadoHoy;
     buildGrid();
     $("statsStart").innerHTML = statRows(remote.arranque || {});
     $("statsEnd").innerHTML = statRows(remote.cierre || {});
   }
   $("btnNext").addEventListener("click", function(){
-    var f = fechas(), hoy = hoyStr(), ix = f.indexOf(hoy);
-    if(ix>=0) f.splice(ix,1); else f.push(hoy);
+    var f = fechas(), hoy = hoyStr();
+    if(f.indexOf(hoy)>=0) return;
+    f.push(hoy);
     lsSet("reto100_fechas", f); render();
   });
+  function hastaMedianoche(){
+    var a = new Date(), m = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1, 0, 0, 5);
+    setTimeout(function(){ render(); hastaMedianoche(); }, m - a);
+  }
+  hastaMedianoche();
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) render(); });
 
   var cached = lsGet("reto100_remote", null);
   if(cached) remote = cached;
