@@ -343,9 +343,8 @@
     renderHistory();
   }
   function renderHistory(){
-    var srv = (serverAportes||[]).map(function(e){ return {fecha:e.fecha, monto:e.monto, concepto:e.concepto||"", local:false}; });
     var loc = lsGet("wallet_local_v1", []).map(function(e){ return {fecha:e.fecha, monto:e.monto, concepto:e.concepto||"", local:true, id:e.id}; });
-    var all = srv.concat(loc).sort(function(a,b){ return parseFecha(b.fecha)-parseFecha(a.fecha); });
+    var all = loc.sort(function(a,b){ return parseFecha(b.fecha)-parseFecha(a.fecha); });
     var box = $("histList");
     $("histEmpty").style.display = all.length ? "none" : "block";
     box.innerHTML = all.map(function(e){
