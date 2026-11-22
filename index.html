@@ -91,6 +91,14 @@
   .plan .txt{ font-size:16.5px; line-height:1.45; color:#f2ecdd; }
   .plan .txt b{ color:var(--gold); font-weight:800; }
   /* botón */
+  .history{ margin-top:28px; }
+  .h-title{ font-size:16px; font-weight:700; margin-bottom:6px; }
+  .h-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 2px; border-bottom:1px solid rgba(255,255,255,.06); }
+  .h-fecha{ color:#b9b3a8; font-size:13.5px; }
+  .h-conc{ color:#8f8a80; font-size:12px; display:block; }
+  .h-monto{ font-weight:700; font-size:15.5px; white-space:nowrap; }
+  .h-del{ background:none; border:none; color:#8f8a80; font-size:18px; padding:2px 6px; cursor:pointer; }
+  .h-empty{ color:#8f8a80; font-size:13.5px; padding:10px 2px; }
   .cta{
     margin-top:24px; width:100%; border:none; cursor:pointer; border-radius:999px;
     padding:19px 0 20px; font-size:19px; font-weight:800; color:#191104; letter-spacing:.2px;
@@ -201,6 +209,12 @@
   </div>
 
   <button class="cta" id="btnAdd">Registrar aporte</button>
+
+  <div class="history">
+    <div class="h-title">Historial de aportes</div>
+    <div id="histList"></div>
+    <div class="h-empty" id="histEmpty">Todavía no hay aportes registrados.</div>
+  </div>
 </div>
 
 <div class="scrim" id="scrim"></div>
@@ -326,6 +340,27 @@
       $("arc").style.strokeDasharray = C;
       $("arc").style.strokeDashoffset = C*(1-Math.min(100,pct)/100);
     }
+    renderHistory();
+  }
+  function renderHistory(){
+    var srv = (serverAportes||[]).map(function(e){ return {fecha:e.fecha, monto:e.monto, concepto:e.concepto||"", local:false}; });
+    var loc = lsGet("wallet_local_v1", []).map(function(e){ return {fecha:e.fecha, monto:e.monto, concepto:e.concepto||"", local:true, id:e.id}; });
+    var all = srv.concat(loc).sort(function(a,b){ return parseFecha(b.fecha)-parseFecha(a.fecha); });
+    var box = $("histList");
+    $("histEmpty").style.display = all.length ? "none" : "block";
+    box.innerHTML = all.map(function(e){
+      var d = parseFecha(e.fecha);
+      var f = d.getDate() + " de " + MESES[d.getMonth()] + " de " + d.getFullYear();
+      var conc = (e.concepto && e.concepto !== "Aporte") ? '<span class="h-conc">' + e.concepto + "</span>" : "";
+      var del = e.local ? '<button class="h-del" data-hdel="' + e.id + '" aria-label="Borrar">×</button>' : "";
+      return '<div class="h-row"><span class="h-fecha">' + f + conc + '</span><span class="h-monto">+' + fmt2(+e.monto) + "</span>" + del + "</div>";
+    }).join("");
+    box.querySelectorAll("[data-hdel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var arr = lsGet("wallet_local_v1", []).filter(function(e){ return String(e.id) !== b.dataset.hdel; });
+        lsSet("wallet_local_v1", arr); renderLocals(); render(true);
+      });
+    });
   }
   function renderLocals(){
     var loc = lsGet("wallet_local_v1", []), box = $("localsBox");
