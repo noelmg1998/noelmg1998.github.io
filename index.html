@@ -140,12 +140,6 @@
 </svg>
 
 <div class="app">
-  <div class="topbar">
-    <div class="round-btn" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></div>
-    <div class="t" id="tbTitle">Meta $15,000</div>
-    <div class="round-btn" id="btnSettings" role="button" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="#fff"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></div>
-  </div>
-
   <div class="hero">
     <div>
       <svg class="target" viewBox="0 0 48 48" fill="none" stroke="#f5c451" stroke-width="3">
@@ -301,7 +295,6 @@
     var c = cfg(), list = entries();
     var total = list.reduce(function(a,e){ return a + (+e.monto||0); }, 0);
     var pct = c.meta>0 ? total/c.meta*100 : 0;
-    $("tbTitle").textContent = "Meta " + fmt0(c.meta);
     $("metaAmount").textContent = fmt0(c.meta);
     buildMiles(c.meta);
     document.querySelectorAll(".mile").forEach(function(m){
@@ -365,9 +358,6 @@
     var arr = lsGet("wallet_local_v1", []);
     arr.push({ id:"L"+Date.now(), fecha:f, monto:Math.round(m*100)/100 });
     lsSet("wallet_local_v1", arr); closeSheets(); render(true);
-  });
-  $("btnSettings").addEventListener("click", function(){
-    var c = cfg(); $("cfgMeta").value = c.meta; $("cfgFecha").value = c.fechaLimite; openSheet("sheetCfg");
   });
   $("cfgCancel").addEventListener("click", closeSheets);
   $("cfgSave").addEventListener("click", function(){
