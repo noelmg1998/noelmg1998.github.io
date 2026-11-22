@@ -339,7 +339,7 @@
     } else if(diasPlan === 0){
       $("planTxt").innerHTML = "La fecha límite es <b>hoy</b> y te faltan <b>" + fmt0(rest) + "</b>.";
     } else {
-      $("planTxt").innerHTML = "Te faltan <b>" + fmt0(rest) + "</b> — debes invertir <b>" + fmt2(rest/diasPlan) + " diario</b> para llegar a la meta.";
+      $("planTxt").innerHTML = "Debes invertir <b>" + fmt2(rest/diasPlan) + " diario</b> para llegar a la meta.";
     }
     var hoy0 = new Date(); hoy0.setHours(0,0,0,0);
     var diasDif = Math.round((parseFecha(c.fechaLimite) - hoy0)/DIA_MS);
